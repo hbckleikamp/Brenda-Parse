@@ -15,8 +15,8 @@ import pandas as pd
 #%% files
 
 #put your path here
-json_file="/Users/hugokleikamp/Downloads/brenda_2022_2.json"
-text_file="/Users/hugokleikamp/Downloads/brenda_2022_2.txt"
+json_file= #path to Brenda json file
+text_file= #path to Brenda text file
 
 #%%
 with open(json_file, "r") as f:
