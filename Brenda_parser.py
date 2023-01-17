@@ -38,9 +38,10 @@ for ix,item in enumerate(data.items()):
     name=i.get("name")
     
     
-    #prganism
+    #organism
     if i.get("organisms"):
         organisms=pd.DataFrame([[k,v.get("value")] for k,v in i.get("organisms").items()],columns=["OX","OS"])
+        
     else:
         organisms=pd.DataFrame([["",""]],columns=["OX","OS"])
 
@@ -48,8 +49,8 @@ for ix,item in enumerate(data.items()):
     if i.get("reaction"):
         
         reactions=pd.DataFrame([[j.get("educts"),
-                                 j.get("products"), 
-                                 j.get("organisms")] for j in i.get("reaction")],columns=["educts","products","OX"])
+                                  j.get("products"), 
+                                  j.get("organisms")] for j in i.get("reaction")],columns=["educts","products","OX"])
         reactions=reactions.explode("OX").dropna()
         reactions["reaction"]=reactions.educts.str.join(" + ")+" -> "+reactions.products.str.join(" + ")
         reactions=reactions[["reaction","OX"]]
@@ -59,7 +60,7 @@ for ix,item in enumerate(data.items()):
     #cofactor
     if i.get("cofactor"):
         cofactors=pd.DataFrame([[j.get("value"), 
-                                 j.get("organisms")] for j in i.get("cofactor")],columns=["cofactor","OX"])
+                                  j.get("organisms")] for j in i.get("cofactor")],columns=["cofactor","OX"])
         cofactors=cofactors.explode("OX")
     else:
         cofactors=pd.DataFrame([["",""]],columns=["cofactor","OX"])
@@ -67,15 +68,17 @@ for ix,item in enumerate(data.items()):
     combined=reactions.merge(organisms,on="OX").merge(cofactors,on="OX")
     combined["name"]=name
     combined["id"]=id
+    combined=combined[['reaction', 'OS', 'cofactor', 'name', 'id']]
     combineds.append(combined)
+
     
 
     
 json_df=pd.concat(combineds)
 
-#%% add typing from text file
+# add typing from text file
 
-with open(text_file,"r") as f:
+with open(text_file,"r",encoding="utf8") as f:
     lines=f.readlines()
     
 IDs=""
@@ -88,7 +91,7 @@ for ix,line in enumerate(lines):
         
         #store
         parsed.append([IDs, # ECnumber
-                       "; ".join(RTs)]) # Reaction type
+                        "; ".join(RTs)]) # Reaction type
 
         #reset
         IDs=line.split("\t")[1].split("\n")[0]
@@ -101,10 +104,8 @@ for ix,line in enumerate(lines):
 
     
 text_df=pd.DataFrame(parsed,
-                       columns=["id","Type"])
+                        columns=["id","Type"])
 
 
 final=json_df.merge(text_df)
 final.to_csv("parsed_brenda.tsv",sep="\t")
-
-
